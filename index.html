@@ -49,11 +49,7 @@
     .modal-content { background:#fff; margin:15% auto; padding:20px; border-radius:8px; width:90%; max-width:400px; font-size:16px; }
     .close-btn { background:#0d6efd; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; float:right; margin-top:10px; }
 
-    @media(max-width:768px){
-      .top-buttons{flex-direction:column;}
-      th,td{font-size:12px;padding:8px;}
-      table{display:block;overflow-x:auto;}
-    }
+    @media(max-width:768px){ .top-buttons{flex-direction:column;} th,td{font-size:12px;padding:8px;} table{display:block;overflow-x:auto;} }
   </style>
 </head>
 <body>
@@ -118,96 +114,22 @@
   let sentCounter = 0;
   let recvCounter = 0;
 
-  function showSection(id){
-    document.getElementById('send').style.display='none';
-    document.getElementById('receive').style.display='none';
-    document.getElementById(id).style.display='block';
-  }
+  function showSection(id){ document.getElementById('send').style.display='none'; document.getElementById('receive').style.display='none'; document.getElementById(id).style.display='block'; }
 
-  function nowStr(){
-    const n=new Date();
-    return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0')+
-           ' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
-  }
+  function nowStr(){ const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0')+' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); }
 
-  function sendSMS(){
-    const m=messageInput.value.trim(), num=numberInput.value.trim();
-    if(!m||!num){alert('Enter message and number'); return;}
-    addSent(m,'Pending');
-    messageInput.value='';
-    numberInput.value='';
-    setTimeout(()=>{
-      const row=document.querySelector('#send tbody tr:first-child');
-      row.cells[3].textContent='Sent';
-      row.cells[3].className='status-sent';
-    },1500);
-  }
+  function sendSMS(){ const m=messageInput.value.trim(), num=numberInput.value.trim(); if(!m||!num){alert('Enter message and number'); return;} addSent(m,'Pending'); messageInput.value=''; numberInput.value=''; setTimeout(()=>{ const row=document.querySelector('#send tbody tr:first-child'); row.cells[3].textContent='Sent'; row.cells[3].className='status-sent'; },1500); }
 
-  function addSent(msg,status){
-    const tb=document.querySelector('#send tbody');
-    sentCounter++;
-    const r=tb.insertRow(0);
-    r.innerHTML=`<td>${sentCounter}</td><td>${nowStr()}</td><td class='message-col'>${msg}</td><td class='status-${status.toLowerCase()}'>${status}</td>`;
-    r.cells[2].onclick=()=>showMessageFull(r.cells[2].textContent);
-  }
+  function addSent(msg,status){ const tb=document.querySelector('#send tbody'); sentCounter++; const r=tb.insertRow(0); r.innerHTML=`<td>${sentCounter}</td><td>${nowStr()}</td><td class='message-col'>${msg}</td><td class='status-${status.toLowerCase()}'>${status}</td>`; r.cells[2].onclick=()=>showMessageFull(r.cells[2].textContent); }
 
-  function addRecv(num,msg){
-    const tb=document.querySelector('#receive tbody');
-    recvCounter++;
-    const r=tb.insertRow(0);
-    r.innerHTML=`<td>${recvCounter}</td><td>${nowStr()}</td><td>${num}</td><td class='message-col'>${msg}</td>`;
-    r.cells[3].onclick=()=>showMessageFull(r.cells[3].textContent);
-  }
+  function addRecv(num,msg){ const tb=document.querySelector('#receive tbody'); recvCounter++; const r=tb.insertRow(0); r.innerHTML=`<td>${recvCounter}</td><td>${nowStr()}</td><td>${num}</td><td class='message-col'>${msg}</td>`; r.cells[3].onclick=()=>showMessageFull(r.cells[3].textContent); }
 
-  function fetchSent(){
-    const samples=[
-      'System update completed',
-      'Delivery report',
-      'Balance low',
-      'Maintenance notice',
-      'Test message from device',
-      'Alert: temperature high',
-      'Ping from gateway',
-      'Scheduled message sent',
-      'Backup finished',
-      'Heartbeat OK'
-    ];
-    let i=0;
-    const t=setInterval(()=>{
-      if(i>=samples.length){clearInterval(t); return;}
-      addSent(samples[i],'Sent');
-      i++;
-    },600);
-  }
+  function fetchSent(){ const samples=[ 'System update completed','Delivery report','Balance low','Maintenance notice','Test message from device','Alert: temperature high','Ping from gateway','Scheduled message sent','Backup finished','Heartbeat OK' ]; let i=0; const t=setInterval(()=>{ if(i>=samples.length){clearInterval(t); return;} addSent(samples[i],'Sent'); i++; },600); }
 
-  function fetchReceived(){
-    const samples=[
-      'Hello from device',
-      'Status?',
-      'Restart now',
-      'Check signal',
-      'Ping',
-      'Emergency alert',
-      'Location update',
-      'Battery low',
-      'Network OK',
-      'Command ACK'
-    ];
-    let i=0;
-    const t=setInterval(()=>{
-      if(i>=samples.length){clearInterval(t); return;}
-      addRecv('09'+Math.floor(100000000+Math.random()*899999999), samples[i]);
-      i++;
-    },700);
-  }
+  function fetchReceived(){ const samples=[ 'Hello from device','Status?','Restart now','Check signal','Ping','Emergency alert','Location update','Battery low','Network OK','Command ACK' ]; let i=0; const t=setInterval(()=>{ if(i>=samples.length){clearInterval(t); return;} addRecv('09'+Math.floor(100000000+Math.random()*899999999), samples[i]); i++; },700); }
 
-  function showMessageFull(t){
-    modalText.textContent=t;
-    messageModal.style.display='block';
-  }
-  function closeModal(){
-    messageModal.style.display='none';
-  }
+  function showMessageFull(t){ modalText.textContent=t; messageModal.style.display='block'; }
+  function closeModal(){ messageModal.style.display='none'; }
 
   showSection('send');
 </script>
