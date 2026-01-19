@@ -40,6 +40,9 @@
     .modal-content { background:#1e1e1e; margin:15% auto; padding:20px; border-radius:8px; width:90%; max-width:400px; font-size:16px; color:#fff; }
     .close-btn { background:#0d6efd; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; float:right; margin-top:10px; }
 
+    /* Popup notification */
+    #sendPopup { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#0d6efd; color:#fff; padding:15px 25px; border-radius:8px; font-size:16px; z-index:1000; box-shadow:0 2px 8px rgba(0,0,0,0.3); }
+
     @media(max-width:768px){ .top-buttons{flex-direction:column;} th,td{font-size:12px;padding:8px;} table{display:block;overflow-x:auto;} }
   </style>
 </head>
@@ -105,12 +108,28 @@
   </div>
 </div>
 
+<div id="sendPopup">Message successfully sent to device</div>
+
 <script>
 let sentCounter = 0;
 let recvCounter = 0;
 
-function showSection(id){ document.getElementById('send').style.display='none'; document.getElementById('receive').style.display='none'; document.getElementById(id).style.display='block'; }
-function nowStr(){ const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0')+' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); }
+function showSection(id){ 
+  document.getElementById('send').style.display='none'; 
+  document.getElementById('receive').style.display='none'; 
+  document.getElementById(id).style.display='block'; 
+}
+
+function nowStr(){ 
+  const n=new Date(); 
+  return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0')+' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); 
+}
+
+function showSendPopup(){
+  const popup = document.getElementById('sendPopup');
+  popup.style.display = 'block';
+  setTimeout(() => { popup.style.display = 'none'; }, 2000);
+}
 
 function sendSMS(){
   const m = messageInput.value.trim();
@@ -122,30 +141,79 @@ function sendSMS(){
   messageInput.value = '';
   numberInput.value = '';
 
-  // تحويل الحالة بعد 1.5 ثانية
+  // Popup يظهر عند إرسال الرسالة
+  showSendPopup();
+
+  // بعد 1.5 ثانية، تحويل الحالة إلى Sent
   setTimeout(() => {
     const row = document.querySelector('#send tbody tr:first-child');
     row.cells[3].textContent = 'Sent';
     row.cells[3].className = 'status-sent';
   }, 1500);
 
-  // إضافة رسالة تلقائية بعد 1 ثانية في جدول الاستقبال
+  // بعد 1 ثانية، إضافة رسالة تلقائية في جدول الاستقبال
   setTimeout(() => {
-    const count = Math.floor(Math.random()*5 + 1); // عدد وهمي من الرسائل للإرسال
+    const count = Math.floor(Math.random()*5 + 1);
     addRecv('Device', `Number of messages to send: ${count}`);
   }, 1000);
 }
 
-function addSent(msg,status){ const tb=document.querySelector('#send tbody'); sentCounter++; const r=tb.insertRow(0); r.innerHTML=`<td>${sentCounter}</td><td>${nowStr()}</td><td class='message-col'>${msg}</td><td class='status-${status.toLowerCase()}'>${status}</td>`; r.className=`status-${status.toLowerCase()}`; r.cells[2].onclick=()=>showMessageFull(r.cells[2].textContent); }
-function addRecv(num,msg){ const tb=document.querySelector('#receive tbody'); recvCounter++; const r=tb.insertRow(0); r.innerHTML=`<td>${recvCounter}</td><td>${nowStr()}</td><td>${num}</td><td class='message-col'>${msg}</td>`; r.cells[3].onclick=()=>showMessageFull(r.cells[3].textContent); }
+function addSent(msg,status){ 
+  const tb=document.querySelector('#send tbody'); 
+  sentCounter++; 
+  const r=tb.insertRow(0); 
+  r.innerHTML=`<td>${sentCounter}</td><td>${nowStr()}</td><td class='message-col'>${msg}</td><td class='status-${status.toLowerCase()}'>${status}</td>`; 
+  r.className=`status-${status.toLowerCase()}`; 
+  r.cells[2].onclick=()=>showMessageFull(r.cells[2].textContent); 
+}
 
-function fetchSent(){ const samples=['System update completed','Delivery report','Balance low','Maintenance notice','Test message from device','Alert: temperature high','Ping from gateway','Scheduled message sent','Backup finished','Heartbeat OK']; const statuses=['Sent','Pending','Failed']; let i=0; const total=20; const t=setInterval(()=>{ if(i>=total){clearInterval(t); return;} const msg=samples[i%samples.length]; const status=statuses[Math.floor(Math.random()*statuses.length)]; addSent(msg,status); i++; },600); }
-function fetchReceived(){ const samples=['Hello from device','Status?','Restart now','Check signal','Ping','Emergency alert','Location update','Battery low','Network OK','Command ACK']; let i=0; const total=20; const t=setInterval(()=>{ if(i>=total){clearInterval(t); return;} addRecv('09'+Math.floor(100000000+Math.random()*899999999), samples[i % samples.length]); i++; },700); }
+function addRecv(num,msg){ 
+  const tb=document.querySelector('#receive tbody'); 
+  recvCounter++; 
+  const r=tb.insertRow(0); 
+  r.innerHTML=`<td>${recvCounter}</td><td>${nowStr()}</td><td>${num}</td><td class='message-col'>${msg}</td>`; 
+  r.cells[3].onclick=()=>showMessageFull(r.cells[3].textContent); 
+}
 
-function showMessageFull(t){ modalText.textContent=t; messageModal.style.display='block'; }
-function closeModal(){ messageModal.style.display='none'; }
+function fetchSent(){ 
+  const samples=['System update completed','Delivery report','Balance low','Maintenance notice','Test message from device','Alert: temperature high','Ping from gateway','Scheduled message sent','Backup finished','Heartbeat OK']; 
+  const statuses=['Sent','Pending','Failed']; 
+  let i=0; const total=20; 
+  const t=setInterval(()=>{
+    if(i>=total){clearInterval(t); return;} 
+    const msg=samples[i%samples.length]; 
+    const status=statuses[Math.floor(Math.random()*statuses.length)]; 
+    addSent(msg,status); 
+    i++; 
+  },600); 
+}
 
-function filterByStatus(){ const filter=document.getElementById('statusFilter').value; const table=document.querySelector('#send tbody'); Array.from(table.rows).forEach(row=>{ row.style.display = (filter==='all'||row.cells[3].textContent===filter) ? '' : 'none'; }); }
+function fetchReceived(){ 
+  const samples=['Hello from device','Status?','Restart now','Check signal','Ping','Emergency alert','Location update','Battery low','Network OK','Command ACK']; 
+  let i=0; const total=20; 
+  const t=setInterval(()=>{
+    if(i>=total){clearInterval(t); return;} 
+    addRecv('09'+Math.floor(100000000+Math.random()*899999999), samples[i % samples.length]); 
+    i++; 
+  },700); 
+}
+
+function showMessageFull(t){ 
+  modalText.textContent=t; 
+  messageModal.style.display='block'; 
+}
+
+function closeModal(){ 
+  messageModal.style.display='none'; 
+}
+
+function filterByStatus(){ 
+  const filter=document.getElementById('statusFilter').value; 
+  const table=document.querySelector('#send tbody'); 
+  Array.from(table.rows).forEach(row=>{
+    row.style.display = (filter==='all'||row.cells[3].textContent===filter) ? '' : 'none'; 
+  }); 
+}
 
 showSection('send');
 </script>
