@@ -124,9 +124,23 @@
 
   function addRecv(num,msg){ const tb=document.querySelector('#receive tbody'); recvCounter++; const r=tb.insertRow(0); r.innerHTML=`<td>${recvCounter}</td><td>${nowStr()}</td><td>${num}</td><td class='message-col'>${msg}</td>`; r.cells[3].onclick=()=>showMessageFull(r.cells[3].textContent); }
 
-  function fetchSent(){ const samples=[ 'System update completed','Delivery report','Balance low','Maintenance notice','Test message from device','Alert: temperature high','Ping from gateway','Scheduled message sent','Backup finished','Heartbeat OK' ]; let i=0; const t=setInterval(()=>{ if(i>=samples.length){clearInterval(t); return;} addSent(samples[i],'Sent'); i++; },600); }
+  function fetchSent(){
+    const samples=[
+      'System update completed','Delivery report','Balance low','Maintenance notice','Test message from device','Alert: temperature high','Ping from gateway','Scheduled message sent','Backup finished','Heartbeat OK',
+      'Notification: security','Reminder: meeting','Server rebooted','Check-in report','Test connection','Warning: overload','Log cleared','Sync completed','Report generated','Heartbeat check'
+    ];
+    let i=0;
+    const t=setInterval(()=>{ if(i>=samples.length){clearInterval(t); return;} addSent(samples[i],'Sent'); i++; },600);
+  }
 
-  function fetchReceived(){ const samples=[ 'Hello from device','Status?','Restart now','Check signal','Ping','Emergency alert','Location update','Battery low','Network OK','Command ACK' ]; let i=0; const t=setInterval(()=>{ if(i>=samples.length){clearInterval(t); return;} addRecv('09'+Math.floor(100000000+Math.random()*899999999), samples[i]); i++; },700); }
+  function fetchReceived(){
+    const samples=[
+      'Hello from device','Status?','Restart now','Check signal','Ping','Emergency alert','Location update','Battery low','Network OK','Command ACK',
+      'Temperature high','Device rebooted','New message','System alert','Maintenance required','Sync completed','Log report','Connection stable','Reminder: task','Check-in OK'
+    ];
+    let i=0;
+    const t=setInterval(()=>{ if(i>=samples.length){clearInterval(t); return;} addRecv('09'+Math.floor(100000000+Math.random()*899999999), samples[i]); i++; },700);
+  }
 
   function showMessageFull(t){ modalText.textContent=t; messageModal.style.display='block'; }
   function closeModal(){ messageModal.style.display='none'; }
@@ -136,3 +150,8 @@
 
 </body>
 </html>
+```
+
+✅ دلوقتي كل زرار **Fetch Last 20 Messages** يعرض **20 رسالة متتابعة**، سواء للإرسال أو الاستقبال.  
+- الرسائل تظهر تدريجيًا كأنها جايه من الجهاز.  
+- نافذة العرض المنبثقة ما زالت موجودة لعرض النصوص الطويلة بالكامل.
