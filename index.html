@@ -5,16 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SMS Dashboard</title>
   <style>
-    body { margin:0; font-family:Arial, Helvetica, sans-serif; background:#f4f6f8; color:#333; display:flex; flex-direction:column; }
+    body { margin:0; font-family:Arial, Helvetica, sans-serif; background:#f4f6f8; color:#333; display:flex; flex-direction:column; transition: background 0.3s, color 0.3s; }
     header { background:#0d6efd; padding:20px; text-align:center; font-size:26px; font-weight:bold; color:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
 
     .top-buttons { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin:20px 10px; }
     .top-buttons button { padding:12px 25px; background:#0d6efd; color:#fff; border:none; border-radius:6px; font-size:16px; cursor:pointer; transition:0.3s; }
     .top-buttons button:hover { background:#094bb5; transform:translateY(-2px); }
 
-    section { display:none; padding:0 10px 30px 10px; }
+    .dark-mode-btn { position:absolute; top:25px; right:20px; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; background:#fff; color:#0d6efd; font-weight:bold; }
 
+    section { display:none; padding:0 10px 30px 10px; }
     .action-bar { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
+
+    input, button.input-btn { padding:10px; margin:5px 0; width:100%; max-width:400px; box-sizing:border-box; border:1px solid #ccc; border-radius:6px; font-size:14px; }
+    button.input-btn { background:#0d6efd; color:#fff; border:none; cursor:pointer; }
+    button.input-btn:hover { background:#094bb5; }
 
     table { width:100%; border-collapse:collapse; margin-top:20px; table-layout:fixed; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
     th, td { border-bottom:1px solid #ddd; padding:12px; text-align:center; font-size:14px; }
@@ -26,22 +31,12 @@
     th.status-col, td.status-col { width:100px; }
 
     th.message-col, td.message-col {
-      text-align:left;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      display:-webkit-box;
-      -webkit-line-clamp:3;
-      -webkit-box-orient:vertical;
-      cursor:pointer;
+      text-align:left; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; cursor:pointer;
     }
 
-    .status-sent{color:green;font-weight:bold;}
-    .status-pending{color:orange;font-weight:bold;}
-    .status-failed{color:red;font-weight:bold;}
-
-    input, button.input-btn { padding:10px; margin:5px 0; width:100%; max-width:400px; box-sizing:border-box; border:1px solid #ccc; border-radius:6px; font-size:14px; }
-    button.input-btn { background:#0d6efd; color:#fff; border:none; cursor:pointer; }
-    button.input-btn:hover { background:#094bb5; }
+    .status-sent{background:#d4edda;color:#155724;}
+    .status-pending{background:#fff3cd;color:#856404;}
+    .status-failed{background:#f8d7da;color:#721c24;}
 
     footer { background:#0d6efd; color:#fff; text-align:center; padding:15px; margin-top:20px; }
 
@@ -49,12 +44,15 @@
     .modal-content { background:#fff; margin:15% auto; padding:20px; border-radius:8px; width:90%; max-width:400px; font-size:16px; }
     .close-btn { background:#0d6efd; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; float:right; margin-top:10px; }
 
+    .search-input { padding:8px; margin-top:10px; width:100%; max-width:300px; border:1px solid #ccc; border-radius:6px; }
+
     @media(max-width:768px){ .top-buttons{flex-direction:column;} th,td{font-size:12px;padding:8px;} table{display:block;overflow-x:auto;} }
   </style>
 </head>
 <body>
 
 <header>SMS Device Dashboard</header>
+<button class="dark-mode-btn" onclick="toggleDarkMode()">Dark Mode</button>
 
 <div class="top-buttons">
   <button onclick="showSection('send')">Send SMS</button>
@@ -63,13 +61,13 @@
 
 <section id="send">
   <h2>Send SMS</h2>
+  <input class="search-input" id="sendSearch" placeholder="Search messages..." oninput="filterTable('send')" />
   <div class="action-bar">
     <input type="text" id="messageInput" placeholder="Enter message content" />
     <input type="text" id="numberInput" placeholder="Enter one or more phone numbers" />
     <button class="input-btn" onclick="sendSMS()">Send</button>
     <button class="input-btn" onclick="fetchSent()">Fetch Last 20 Messages</button>
   </div>
-
   <table>
     <thead>
       <tr>
@@ -85,6 +83,7 @@
 
 <section id="receive">
   <h2>Received Messages</h2>
+  <input class="search-input" id="recvSearch" placeholder="Search messages..." oninput="filterTable('receive')" />
   <div class="action-bar">
     <button class="input-btn" onclick="fetchReceived()">Fetch Last 20 Messages</button>
   </div>
@@ -111,51 +110,29 @@
 <footer>© 2026 SMS Dashboard</footer>
 
 <script>
-  let sentCounter = 0;
-  let recvCounter = 0;
+let sentCounter = 0;
+let recvCounter = 0;
+let darkMode = false;
 
-  function showSection(id){ document.getElementById('send').style.display='none'; document.getElementById('receive').style.display='none'; document.getElementById(id).style.display='block'; }
+function showSection(id){ document.getElementById('send').style.display='none'; document.getElementById('receive').style.display='none'; document.getElementById(id).style.display='block'; }
+function nowStr(){ const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0')+' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); }
 
-  function nowStr(){ const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0')+' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); }
+function sendSMS(){ const m=messageInput.value.trim(), num=numberInput.value.trim(); if(!m||!num){alert('Enter message and number'); return;} addSent(m,'Pending'); messageInput.value=''; numberInput.value=''; setTimeout(()=>{ const row=document.querySelector('#send tbody tr:first-child'); row.cells[3].textContent='Sent'; row.cells[3].className='status-sent'; },1500); }
 
-  function sendSMS(){ const m=messageInput.value.trim(), num=numberInput.value.trim(); if(!m||!num){alert('Enter message and number'); return;} addSent(m,'Pending'); messageInput.value=''; numberInput.value=''; setTimeout(()=>{ const row=document.querySelector('#send tbody tr:first-child'); row.cells[3].textContent='Sent'; row.cells[3].className='status-sent'; },1500); }
+function addSent(msg,status){ const tb=document.querySelector('#send tbody'); sentCounter++; const r=tb.insertRow(0); r.innerHTML=`<td>${sentCounter}</td><td>${nowStr()}</td><td class='message-col'>${msg}</td><td class='status-${status.toLowerCase()}'>${status}</td>`; r.className=`status-${status.toLowerCase()}`; r.cells[2].onclick=()=>showMessageFull(r.cells[2].textContent); }
+function addRecv(num,msg){ const tb=document.querySelector('#receive tbody'); recvCounter++; const r=tb.insertRow(0); r.innerHTML=`<td>${recvCounter}</td><td>${nowStr()}</td><td>${num}</td><td class='message-col'>${msg}</td>`; r.cells[3].onclick=()=>showMessageFull(r.cells[3].textContent); }
 
-  function addSent(msg,status){ const tb=document.querySelector('#send tbody'); sentCounter++; const r=tb.insertRow(0); r.innerHTML=`<td>${sentCounter}</td><td>${nowStr()}</td><td class='message-col'>${msg}</td><td class='status-${status.toLowerCase()}'>${status}</td>`; r.cells[2].onclick=()=>showMessageFull(r.cells[2].textContent); }
+function fetchSent(){ const samples=['System update completed','Delivery report','Balance low','Maintenance notice','Test message from device','Alert: temperature high','Ping from gateway','Scheduled message sent','Backup finished','Heartbeat OK']; const statuses=['Sent','Pending','Failed']; let i=0; const total=20; const t=setInterval(()=>{ if(i>=total){clearInterval(t); return;} const msg=samples[i%samples.length]; const status=statuses[Math.floor(Math.random()*statuses.length)]; addSent(msg,status); i++; },600); }
+function fetchReceived(){ const samples=['Hello from device','Status?','Restart now','Check signal','Ping','Emergency alert','Location update','Battery low','Network OK','Command ACK']; let i=0; const total=20; const t=setInterval(()=>{ if(i>=total){clearInterval(t); return;} addRecv('09'+Math.floor(100000000+Math.random()*899999999), samples[i % samples.length]); i++; },700); }
 
-  function addRecv(num,msg){ const tb=document.querySelector('#receive tbody'); recvCounter++; const r=tb.insertRow(0); r.innerHTML=`<td>${recvCounter}</td><td>${nowStr()}</td><td>${num}</td><td class='message-col'>${msg}</td>`; r.cells[3].onclick=()=>showMessageFull(r.cells[3].textContent); }
+function showMessageFull(t){ modalText.textContent=t; messageModal.style.display='block'; }
+function closeModal(){ messageModal.style.display='none'; }
 
-  function fetchSent(){
-    const samples = [
-      'System update completed','Delivery report','Balance low','Maintenance notice','Test message from device','Alert: temperature high','Ping from gateway','Scheduled message sent','Backup finished','Heartbeat OK'
-    ];
-    const statuses = ['Sent','Pending','Failed'];
-    let i=0; const total=20;
-    const t=setInterval(()=>{
-      if(i>=total){clearInterval(t); return;}
-      const msg = samples[i % samples.length];
-      const status = statuses[Math.floor(Math.random()*statuses.length)];
-      addSent(msg,status);
-      i++;
-    },600);
-  }
+function toggleDarkMode(){ darkMode=!darkMode; if(darkMode){ document.body.style.background='#121212'; document.body.style.color='#f0f0f0'; }else{ document.body.style.background='#f4f6f8'; document.body.style.color='#333'; } }
 
-  function fetchReceived(){
-    const samples=[
-      'Hello from device','Status?','Restart now','Check signal','Ping','Emergency alert','Location update','Battery low','Network OK','Command ACK',
-      'Temperature high','Device rebooted','New message','System alert','Maintenance required','Sync completed','Log report','Connection stable','Reminder: task','Check-in OK'
-    ];
-    let i=0; const total=20;
-    const t=setInterval(()=>{
-      if(i>=total){clearInterval(t); return;}
-      addRecv('09'+Math.floor(100000000+Math.random()*899999999), samples[i % samples.length]);
-      i++;
-    },700);
-  }
+function filterTable(section){ const input=document.getElementById(section+'Search'); const filter=input.value.toLowerCase(); const table=document.querySelector('#'+section+' tbody'); Array.from(table.rows).forEach(row=>{ row.style.display = Array.from(row.cells).some(cell=>cell.textContent.toLowerCase().includes(filter)) ? '' : 'none'; }); }
 
-  function showMessageFull(t){ modalText.textContent=t; messageModal.style.display='block'; }
-  function closeModal(){ messageModal.style.display='none'; }
-
-  showSection('send');
+showSection('send');
 </script>
 
 </body>
