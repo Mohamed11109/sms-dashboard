@@ -43,7 +43,16 @@
     /* Popup notification */
     #sendPopup { display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:#0d6efd; color:#fff; padding:15px 25px; border-radius:8px; font-size:16px; z-index:1000; box-shadow:0 2px 8px rgba(0,0,0,0.3); }
 
-    @media(max-width:768px){ .top-buttons{flex-direction:column;} th,td{font-size:12px;padding:8px;} table{display:block;overflow-x:auto;} }
+    @media(max-width:768px){ 
+      .top-buttons{flex-direction:column;} 
+      th,td{font-size:12px;padding:8px;} 
+      table{display:block;overflow-x:auto;} 
+      th.message-col, td.message-col{
+        -webkit-line-clamp:unset; 
+        white-space: normal;
+        overflow: visible;
+      }
+    }
   </style>
 </head>
 <body>
@@ -58,36 +67,15 @@
 <section id="send">
   <h2>Send SMS</h2>
   <div class="action-bar">
-    <label for="statusFilter">Filter by Status:</label>
-    <select id="statusFilter" onchange="filterByStatus()">
-      <option value="all">All</option>
-      <option value="Sent">Sent</option>
-      <option value="Pending">Pending</option>
-      <option value="Failed">Failed</option>
-    </select>
     <input type="text" id="messageInput" placeholder="Enter message content" />
     <input type="text" id="numberInput" placeholder="Enter one or more phone numbers" />
     <button class="input-btn" onclick="sendSMS()">Send</button>
-    <button class="input-btn" onclick="fetchSent()">Fetch Last 20 Messages</button>
+    <button class="input-btn" onclick="fetchReceived()">Fetch Last 20 Messages</button>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th class="no-col">#</th>
-        <th class="date-col">Date & Time</th>
-        <th class="message-col">Message</th>
-        <th class="status-col">Status</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
 </section>
 
 <section id="receive">
   <h2>Received Messages</h2>
-  <div class="action-bar">
-    <button class="input-btn" onclick="fetchReceived()">Fetch Last 20 Messages</button>
-  </div>
   <table>
     <thead>
       <tr>
@@ -111,7 +99,6 @@
 <div id="sendPopup">Message successfully sent to device</div>
 
 <script>
-let sentCounter = 0;
 let recvCounter = 0;
 
 function showSection(id){ 
@@ -136,20 +123,8 @@ function sendSMS(){
   const num = numberInput.value.trim();
   if(!m || !num){ alert('Enter message and number'); return; }
 
-  // إضافة الرسالة في جدول الإرسال
-  addSent(m,'Pending');
-  messageInput.value = '';
-  numberInput.value = '';
-
-  // Popup يظهر عند إرسال الرسالة
+  // فقط يظهر Popup عند إرسال الرسالة
   showSendPopup();
-
-  // بعد 1.5 ثانية، تحويل الحالة إلى Sent
-  setTimeout(() => {
-    const row = document.querySelector('#send tbody tr:first-child');
-    row.cells[3].textContent = 'Sent';
-    row.cells[3].className = 'status-sent';
-  }, 1500);
 
   // بعد 1 ثانية، إضافة رسالة تلقائية في جدول الاستقبال
   setTimeout(() => {
@@ -158,34 +133,12 @@ function sendSMS(){
   }, 1000);
 }
 
-function addSent(msg,status){ 
-  const tb=document.querySelector('#send tbody'); 
-  sentCounter++; 
-  const r=tb.insertRow(0); 
-  r.innerHTML=`<td>${sentCounter}</td><td>${nowStr()}</td><td class='message-col'>${msg}</td><td class='status-${status.toLowerCase()}'>${status}</td>`; 
-  r.className=`status-${status.toLowerCase()}`; 
-  r.cells[2].onclick=()=>showMessageFull(r.cells[2].textContent); 
-}
-
 function addRecv(num,msg){ 
   const tb=document.querySelector('#receive tbody'); 
   recvCounter++; 
   const r=tb.insertRow(0); 
   r.innerHTML=`<td>${recvCounter}</td><td>${nowStr()}</td><td>${num}</td><td class='message-col'>${msg}</td>`; 
   r.cells[3].onclick=()=>showMessageFull(r.cells[3].textContent); 
-}
-
-function fetchSent(){ 
-  const samples=['System update completed','Delivery report','Balance low','Maintenance notice','Test message from device','Alert: temperature high','Ping from gateway','Scheduled message sent','Backup finished','Heartbeat OK']; 
-  const statuses=['Sent','Pending','Failed']; 
-  let i=0; const total=20; 
-  const t=setInterval(()=>{
-    if(i>=total){clearInterval(t); return;} 
-    const msg=samples[i%samples.length]; 
-    const status=statuses[Math.floor(Math.random()*statuses.length)]; 
-    addSent(msg,status); 
-    i++; 
-  },600); 
 }
 
 function fetchReceived(){ 
@@ -205,14 +158,6 @@ function showMessageFull(t){
 
 function closeModal(){ 
   messageModal.style.display='none'; 
-}
-
-function filterByStatus(){ 
-  const filter=document.getElementById('statusFilter').value; 
-  const table=document.querySelector('#send tbody'); 
-  Array.from(table.rows).forEach(row=>{
-    row.style.display = (filter==='all'||row.cells[3].textContent===filter) ? '' : 'none'; 
-  }); 
 }
 
 showSection('send');
