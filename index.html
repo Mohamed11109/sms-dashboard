@@ -112,7 +112,29 @@ let recvCounter = 0;
 function showSection(id){ document.getElementById('send').style.display='none'; document.getElementById('receive').style.display='none'; document.getElementById(id).style.display='block'; }
 function nowStr(){ const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0')+' '+String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0'); }
 
-function sendSMS(){ const m=messageInput.value.trim(), num=numberInput.value.trim(); if(!m||!num){alert('Enter message and number'); return;} addSent(m,'Pending'); messageInput.value=''; numberInput.value=''; setTimeout(()=>{ const row=document.querySelector('#send tbody tr:first-child'); row.cells[3].textContent='Sent'; row.cells[3].className='status-sent'; },1500); }
+function sendSMS(){
+  const m = messageInput.value.trim();
+  const num = numberInput.value.trim();
+  if(!m || !num){ alert('Enter message and number'); return; }
+
+  // إضافة الرسالة في جدول الإرسال
+  addSent(m,'Pending');
+  messageInput.value = '';
+  numberInput.value = '';
+
+  // تحويل الحالة بعد 1.5 ثانية
+  setTimeout(() => {
+    const row = document.querySelector('#send tbody tr:first-child');
+    row.cells[3].textContent = 'Sent';
+    row.cells[3].className = 'status-sent';
+  }, 1500);
+
+  // إضافة رسالة تلقائية بعد 1 ثانية في جدول الاستقبال
+  setTimeout(() => {
+    const count = Math.floor(Math.random()*5 + 1); // عدد وهمي من الرسائل للإرسال
+    addRecv('Device', `Number of messages to send: ${count}`);
+  }, 1000);
+}
 
 function addSent(msg,status){ const tb=document.querySelector('#send tbody'); sentCounter++; const r=tb.insertRow(0); r.innerHTML=`<td>${sentCounter}</td><td>${nowStr()}</td><td class='message-col'>${msg}</td><td class='status-${status.toLowerCase()}'>${status}</td>`; r.className=`status-${status.toLowerCase()}`; r.cells[2].onclick=()=>showMessageFull(r.cells[2].textContent); }
 function addRecv(num,msg){ const tb=document.querySelector('#receive tbody'); recvCounter++; const r=tb.insertRow(0); r.innerHTML=`<td>${recvCounter}</td><td>${nowStr()}</td><td>${num}</td><td class='message-col'>${msg}</td>`; r.cells[3].onclick=()=>showMessageFull(r.cells[3].textContent); }
