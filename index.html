@@ -75,7 +75,15 @@
 
     th.no-col, td.no-col { width: 40px; }
     th.date-col, td.date-col { width: 150px; }
-    th.message-col, td.message-col { text-align: left; }
+    th.message-col, td.message-col {
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 3; /* show up to 3 lines on mobile */
+      -webkit-box-orient: vertical;
+      cursor: pointer;
+    }
     th.number-col, td.number-col { width: 120px; }
     th.status-col, td.status-col { width: 100px; }
 
