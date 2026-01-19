@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SMS Dashboard</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f6f8;
+      color: #333;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: #0d6efd;
+      padding: 20px;
+      text-align: center;
+      font-size: 26px;
+      font-weight: bold;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .top-buttons {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 10px;
+    }
+    .top-buttons button {
+      padding: 12px 25px;
+      background: #0d6efd;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+    }
+    .top-buttons button:hover {
+      background: #094bb5;
+      transform: translateY(-2px);
+    }
+
+    section {
+      display: none;
+      padding: 0 10px 30px 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      table-layout: fixed;
+      word-wrap: break-word;
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 12px;
+      text-align: center;
+      font-size: 14px;
+    }
+    th {
+      background: #f0f2f5;
+      font-weight: 600;
+    }
+
+    /* تخصيص الأعمدة */
+    th.no-col, td.no-col { width: 40px; }
+    th.date-col, td.date-col { width: 150px; }
+    th.message-col, td.message-col { text-align: left; }
+    th.number-col, td.number-col { width: 120px; }
+    th.status-col, td.status-col { width: 100px; }
+
+    /* ألوان الحالة */
+    .status-sent { color: green; font-weight: bold; }
+    .status-pending { color: orange; font-weight: bold; }
+    .status-failed { color: red; font-weight: bold; }
+
+    input, button.input-btn {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    button.input-btn {
+      background: #0d6efd;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button.input-btn:hover {
+      background: #094bb5;
+    }
+
+    footer {
+      background: #0d6efd;
+      color: #fff;
+      text-align: center;
+      padding: 15px;
+      margin-top: 20px;
+    }
+
+    /* Responsive */
+    @media screen and (max-width: 768px) {
+      .top-buttons { flex-direction: column; }
+      th, td { font-size: 12px; padding: 8px; }
+      input, button.input-btn { max-width: 100%; }
+      table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<header>SMS Device Dashboard</header>
+
+<div class="top-buttons">
+  <button onclick="showSection('send')">Send SMS</button>
+  <button onclick="showSection('receive')">Receive SMS</button>
+</div>
+
+<section id="send">
+  <h2>Send SMS</h2>
+  <input type="text" placeholder="Enter message content" />
+  <input type="text" placeholder="Enter one or more phone numbers" />
+  <button class="input-btn">Send</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="no-col">#</th>
+        <th class="date-col">Date & Time</th>
+        <th class="message-col">Message</th>
+        <th class="status-col">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>2026-01-19 10:00</td><td>Hello, test message 1</td><td class="status-sent">Sent</td></tr>
+      <tr><td>2</td><td>2026-01-19 10:15</td><td>Reminder: meeting at 12</td><td class="status-sent">Sent</td></tr>
+      <tr><td>3</td><td>2026-01-19 10:30</td><td>Check this out!</td><td class="status-pending">Pending</td></tr>
+      <tr><td>4</td><td>2026-01-19 10:45</td><td>Happy New Year!</td><td class="status-failed">Failed</td></tr>
+      <tr><td>5</td><td>2026-01-19 11:00</td><td>Don't forget to call</td><td class="status-sent">Sent</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="receive">
+  <h2>Received Messages</h2>
+  <table>
+    <thead>
+      <tr>
+        <th class="no-col">#</th>
+        <th class="date-col">Date & Time</th>
+        <th class="number-col">Sender Number</th>
+        <th class="message-col">Message</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td>2026-01-19 09:30</td><td>0987654321</td><td>Welcome to our service</td></tr>
+      <tr><td>2</td><td>2026-01-19 09:45</td><td>0987654322</td><td>Your OTP is 1234</td></tr>
+      <tr><td>3</td><td>2026-01-19 10:00</td><td>0987654323</td><td>Meeting rescheduled to 3 PM</td></tr>
+      <tr><td>4</td><td>2026-01-19 10:15</td><td>0987654324</td><td>Happy Birthday!</td></tr>
+      <tr><td>5</td><td>2026-01-19 10:30</td><td>0987654325</td><td>Please confirm your attendance</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>© 2026 SMS Dashboard</footer>
+
+<script>
+  function showSection(sectionId) {
+    document.getElementById('send').style.display = 'none';
+    document.getElementById('receive').style.display = 'none';
+    document.getElementById(sectionId).style.display = 'block';
+  }
+
+  // Show Send SMS section by default
+  showSection('send');
+</script>
+
+</body>
+</html>
