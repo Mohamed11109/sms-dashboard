@@ -12,12 +12,12 @@
     .top-buttons button { padding:12px 25px; background:#0d6efd; color:#fff; border:none; border-radius:6px; font-size:16px; cursor:pointer; transition:0.3s; }
     .top-buttons button:hover { background:#094bb5; transform:translateY(-2px); }
 
-    .dark-mode-btn { position:absolute; top:20px; right:20px; padding:8px 15px; border:none; border-radius:5px; cursor:pointer; background:#fff; color:#0d6efd; font-weight:bold; }
+    .dark-mode-btn { position:absolute; top:50%; right:20px; transform:translateY(-50%); padding:8px 15px; border:none; border-radius:5px; cursor:pointer; background:#fff; color:#0d6efd; font-weight:bold; }
 
     section { display:none; padding:0 10px 30px 10px; }
-    .action-bar { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
+    .action-bar { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; align-items:center; }
 
-    input, button.input-btn { padding:10px; margin:5px 0; width:100%; max-width:400px; box-sizing:border-box; border:1px solid #ccc; border-radius:6px; font-size:14px; }
+    input, select, button.input-btn { padding:10px; margin:5px 0; width:100%; max-width:400px; box-sizing:border-box; border:1px solid #ccc; border-radius:6px; font-size:14px; }
     button.input-btn { background:#0d6efd; color:#fff; border:none; cursor:pointer; }
     button.input-btn:hover { background:#094bb5; }
 
@@ -28,7 +28,7 @@
     th.no-col, td.no-col { width:40px; }
     th.date-col, td.date-col { width:150px; }
     th.number-col, td.number-col { width:120px; }
-    th.status-col, td.status-col { width:100px; }
+    th.status-col, td.status-col { width:120px; }
 
     th.message-col, td.message-col {
       text-align:left; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; cursor:pointer;
@@ -43,8 +43,6 @@
     .modal { display:none; position:fixed; z-index:999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); }
     .modal-content { background:#fff; margin:15% auto; padding:20px; border-radius:8px; width:90%; max-width:400px; font-size:16px; }
     .close-btn { background:#0d6efd; color:#fff; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; float:right; margin-top:10px; }
-
-    .search-input { padding:8px; margin-top:10px; width:100%; max-width:300px; border:1px solid #ccc; border-radius:6px; }
 
     @media(max-width:768px){ .top-buttons{flex-direction:column;} th,td{font-size:12px;padding:8px;} table{display:block;overflow-x:auto;} }
   </style>
@@ -62,8 +60,14 @@
 
 <section id="send">
   <h2>Send SMS</h2>
-  <input class="search-input" id="sendSearch" placeholder="Search messages..." oninput="filterTable('send')" />
   <div class="action-bar">
+    <label for="statusFilter">Filter by Status:</label>
+    <select id="statusFilter" onchange="filterByStatus()">
+      <option value="all">All</option>
+      <option value="Sent">Sent</option>
+      <option value="Pending">Pending</option>
+      <option value="Failed">Failed</option>
+    </select>
     <input type="text" id="messageInput" placeholder="Enter message content" />
     <input type="text" id="numberInput" placeholder="Enter one or more phone numbers" />
     <button class="input-btn" onclick="sendSMS()">Send</button>
@@ -84,7 +88,6 @@
 
 <section id="receive">
   <h2>Received Messages</h2>
-  <input class="search-input" id="recvSearch" placeholder="Search messages..." oninput="filterTable('receive')" />
   <div class="action-bar">
     <button class="input-btn" onclick="fetchReceived()">Fetch Last 20 Messages</button>
   </div>
@@ -129,9 +132,9 @@ function fetchReceived(){ const samples=['Hello from device','Status?','Restart 
 function showMessageFull(t){ modalText.textContent=t; messageModal.style.display='block'; }
 function closeModal(){ messageModal.style.display='none'; }
 
-function toggleDarkMode(){ darkMode=!darkMode; if(darkMode){ document.body.style.background='#121212'; document.body.style.color='#f0f0f0'; }else{ document.body.style.background='#f4f6f8'; document.body.style.color='#333'; } }
+function toggleDarkMode(){ darkMode=!darkMode; if(darkMode){ document.body.style.background='#121212'; document.body.style.color='#fff'; document.querySelector('header').style.color='#fff'; }else{ document.body.style.background='#f4f6f8'; document.body.style.color='#333'; document.querySelector('header').style.color='#fff'; } }
 
-function filterTable(section){ const input=document.getElementById(section+'Search'); const filter=input.value.toLowerCase(); const table=document.querySelector('#'+section+' tbody'); Array.from(table.rows).forEach(row=>{ row.style.display = Array.from(row.cells).some(cell=>cell.textContent.toLowerCase().includes(filter)) ? '' : 'none'; }); }
+function filterByStatus(){ const filter=document.getElementById('statusFilter').value; const table=document.querySelector('#send tbody'); Array.from(table.rows).forEach(row=>{ row.style.display = (filter==='all'||row.cells[3].textContent===filter) ? '' : 'none'; }); }
 
 showSection('send');
 </script>
