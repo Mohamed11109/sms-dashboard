@@ -73,14 +73,12 @@
       font-weight: 600;
     }
 
-    /* تخصيص الأعمدة */
     th.no-col, td.no-col { width: 40px; }
     th.date-col, td.date-col { width: 150px; }
     th.message-col, td.message-col { text-align: left; }
     th.number-col, td.number-col { width: 120px; }
     th.status-col, td.status-col { width: 100px; }
 
-    /* ألوان الحالة */
     .status-sent { color: green; font-weight: bold; }
     .status-pending { color: orange; font-weight: bold; }
     .status-failed { color: red; font-weight: bold; }
@@ -114,7 +112,6 @@
       margin-top: 20px;
     }
 
-    /* Responsive */
     @media screen and (max-width: 768px) {
       .top-buttons { flex-direction: column; }
       th, td { font-size: 12px; padding: 8px; }
@@ -134,9 +131,9 @@
 
 <section id="send">
   <h2>Send SMS</h2>
-  <input type="text" placeholder="Enter message content" />
-  <input type="text" placeholder="Enter one or more phone numbers" />
-  <button class="input-btn">Send</button>
+  <input type="text" id="messageInput" placeholder="Enter message content" />
+  <input type="text" id="numberInput" placeholder="Enter one or more phone numbers" />
+  <button class="input-btn" onclick="sendSMS()">Send</button>
 
   <table>
     <thead>
@@ -181,13 +178,48 @@
 <footer>© 2026 SMS Dashboard</footer>
 
 <script>
+  let sentCounter = 5;
+
   function showSection(sectionId) {
     document.getElementById('send').style.display = 'none';
     document.getElementById('receive').style.display = 'none';
     document.getElementById(sectionId).style.display = 'block';
   }
 
-  // Show Send SMS section by default
+  function sendSMS() {
+      const message = document.getElementById('messageInput').value.trim();
+      const number = document.getElementById('numberInput').value.trim();
+
+      if (!message || !number) {
+          alert('Please enter message and number.');
+          return;
+      }
+
+      sentCounter++;
+
+      const table = document.querySelector('#send tbody');
+      const now = new Date();
+      const dateTime = now.getFullYear() + '-' +
+                       String(now.getMonth()+1).padStart(2,'0') + '-' +
+                       String(now.getDate()).padStart(2,'0') + ' ' +
+                       String(now.getHours()).padStart(2,'0') + ':' +
+                       String(now.getMinutes()).padStart(2,'0');
+
+      const row = table.insertRow();
+      row.innerHTML = `<td>${sentCounter}</td>
+                       <td>${dateTime}</td>
+                       <td>${message}</td>
+                       <td class="status-pending">Pending</td>`;
+
+      document.getElementById('messageInput').value = '';
+      document.getElementById('numberInput').value = '';
+
+      setTimeout(() => {
+          row.cells[3].textContent = 'Sent';
+          row.cells[3].className = 'status-sent';
+      }, 2000);
+  }
+
   showSection('send');
 </script>
 
